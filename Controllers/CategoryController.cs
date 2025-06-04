@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SycamoreCommercial.Data;
-using SycamoreCommercial.Models;
+using Sycamore.DataAccess;
+using Sycamore.Models.Models;
 
 namespace SycamoreCommercial.Controllers
 {

@@ -14,4 +14,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Sycamore.DataAccess\Sycamore.DataAccess.csproj" />
+    <ProjectReference Include="..\Sycamore.Models\Sycamore.Models.csproj" />
+  </ItemGroup>
+
 </Project>
