@@ -1,20 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sycamore.DataAccess;
+using Sycamore.DataAccess.Repository.IRepository;
 using Sycamore.Models.Models;
 
-namespace SycamoreCommercial.Controllers
+namespace SycamoreCommercial.Areas.Customer.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext _db;
-        public CategoryController(ApplicationDbContext db)
+        private readonly IUnitofWork _categoryRepo;
+        public CategoryController(IUnitofWork db)
         {
-            _db = db;
+            _categoryRepo = db;
         }
 
         public IActionResult Index()
         {
-            List<Category> categories = _db.Categories.ToList();
+            List<Category> categories = _categoryRepo.Category.GetAll().ToList();
             return View(categories);
         }
 
@@ -31,8 +33,8 @@ namespace SycamoreCommercial.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _db.Categories.Add(obj);
-                    _db.SaveChanges();
+                    _categoryRepo.Category.Add(obj);
+                    _categoryRepo.Save();
                     TempData["success"] = "Category Added Successfully";
                     return RedirectToAction("Index");
 
@@ -67,7 +69,7 @@ namespace SycamoreCommercial.Controllers
                     return NotFound();
                 }
 
-                var category = _db.Categories.FirstOrDefault(r => r.Id == id);
+                var category = _categoryRepo.Category.Get (r => r.Id == id);
                 if (category == null)
                 {
                     return NotFound();
@@ -92,18 +94,25 @@ namespace SycamoreCommercial.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    bool duplicateExists = _db.Categories.Any(c =>
-                    c.Id != obj.Id &&
-                    c.CategoryName == obj.CategoryName &&
-                    c.Order == obj.Order);
+                    //bool duplicateExists = _categoryRepo.GetAll().Any(c =>
+                    //c.Id != obj.Id &&
+                    //c.CategoryName == obj.CategoryName &&
+                    //c.Order == obj.Order);
 
-                    if (duplicateExists)
+                    //if (duplicateExists)
+                    //{
+                    //    ModelState.AddModelError(string.Empty, "A category with the same name and order already exists.");
+                    //    return View(obj); // return form with error
+                    //}
+
+                    if (_categoryRepo.Category.IsDuplicateCategory(obj.CategoryName, obj.Order, obj.Id))
                     {
-                        ModelState.AddModelError(string.Empty, "A category with the same name and order already exists.");
-                        return View(obj); // return form with error
+                        TempData["error"] = "A category with the same name and order already exists.";
+                        
+                        return View(obj);
                     }
-                    _db.Categories.Update(obj);
-                    _db.SaveChanges();
+                    _categoryRepo.Category.Update(obj);
+                    _categoryRepo.Save();
                     TempData["success"] = "Category Edited Successfully";
                     return RedirectToAction("Index");
                 }
@@ -123,7 +132,7 @@ namespace SycamoreCommercial.Controllers
             {
                 return NotFound();
             }
-            var category = _db.Categories.FirstOrDefault(r => r.Id == id);
+            var category = _categoryRepo.Category.Get(r => r.Id == id);
             if (category == null)
             {
                 return NotFound();
@@ -138,8 +147,8 @@ namespace SycamoreCommercial.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    _db.Categories.Remove(obj);
-                    _db.SaveChanges();
+                    _categoryRepo.Category.Remove(obj);
+                    _categoryRepo.Save();
                     TempData["success"] = "Category Deleted Successfully";
                     return RedirectToAction("Index");
                 }
